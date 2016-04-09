@@ -30,11 +30,25 @@ class Robot
   end
 
   def attack(another_robot)
-    if equipped_weapon
+    rx = position.first
+    ry = position.last
+    ex = another_robot.position.first
+    ey = another_robot.position.last
+    x_cor = (rx-ex).abs
+    y_cor = (ry-ey).abs
+
+    if x_cor <= 1 && y_cor <=1
+      if equipped_weapon.is_a?(Weapon)
       equipped_weapon.hit(another_robot)
-    else
-      another_robot.wound(5)
+      else
+        another_robot.wound(5)
+      end
+    elsif equipped_weapon.is_a?(Grenade) && x_cor <= 2 && y_cor <=2
+      equipped_weapon.hit(another_robot)
+      @equipped_weapon = nil
     end
+      
+      
   end
 
   def wound(amount)
@@ -54,6 +68,8 @@ class Robot
   def pick_up(item)
     if item.is_a?(Weapon)
       self.equipped_weapon = item
+    elsif item.is_a?(BoxOfBolts) && health <=80
+      item.feed(self)
     else
       if items_weight + item.weight <= MAX_WEIGHT
         items << item
